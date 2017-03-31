@@ -122,7 +122,7 @@ var giftr = {
         if (giftr.data[giftr.data_id] && giftr.data[giftr.data_id].ideas.length) {
             giftr.page_gift.innerHTML = ""
             for (var i = 0; i < giftr.data[giftr.data_id].ideas.length; i++) {
-                var li = '<li class="table-view-cell media">' + ' <span id="g-delete-' + giftr.data[giftr.data_id].ideas[i].idIdea + '" class="pull-right icon icon-trash midline" style="color:lightcoral;"></span><span id="g-' + giftr.data[giftr.data_id].ideas[i].idIdea + '"  class="icon icon-edit midline-top" style="color:cornflowerblue"></span>' + '<div class="media-body"> ' + giftr.data[giftr.data_id].ideas[i].idea + '<p>' + giftr.data[giftr.data_id].ideas[i].store + '</p>' + '<p><a href="' + giftr.data[giftr.data_id].ideas[i].url + '" target="_blank" data-ignore="push">' + giftr.data[giftr.data_id].ideas[i].url + '</a></p>' + '<p>' + giftr.data[giftr.data_id].ideas[i].cost + '</p>' + '</div>' + '</li>';
+                var li = '<li class="table-view-cell media">' + ' <span id="g-delete-' + giftr.data[giftr.data_id].ideas[i].idIdea + '" class="pull-right icon icon-trash midline" style="color:lightcoral;"></span><span id="g-' + giftr.data[giftr.data_id].ideas[i].idIdea + '"  class="icon icon-edit midline-top" style="color:cornflowerblue"></span>' + '<div class="media-body"> ' + giftr.data[giftr.data_id].ideas[i].idea + '<p>' + giftr.data[giftr.data_id].ideas[i].store + '&nbsp;</p>' + '<p><a href="' + giftr.data[giftr.data_id].ideas[i].url + '" target="_blank" data-ignore="push">' + giftr.data[giftr.data_id].ideas[i].url + '</a></p>' + '<p>' + giftr.data[giftr.data_id].ideas[i].cost + '</p>' + '</div>' + '</li>';
                 giftr.page_gift.innerHTML += li;
             }
             for (var i = 0; i < giftr.data[giftr.data_id].ideas.length; i++) {
@@ -140,7 +140,7 @@ var giftr = {
             for (var i = 0; i < giftr.data[giftr.data_id].ideas.length; i++) {
                 document.getElementById("g-delete-" + giftr.data[giftr.data_id].ideas[i].idIdea).addEventListener("click", function (i) {
                     return function () {
-                        if (confirm("Are you sure want to delete this idea ?\n" + giftr.data[giftr.data_id].ideas[i].idea)) {
+                        if (confirm("Are you sure want to delete '" + giftr.data[giftr.data_id].ideas[i].idea+"' ?")) {
                             giftr.data[giftr.data_id].ideas.splice(i, 1);
                             giftr.storeLocal();
                             giftr.drawIdea();
@@ -172,7 +172,7 @@ var giftr = {
     }
     , addIdea: function () {
         giftr.checkIdea();
-        if (giftr.form_err_flag=4) {
+        if (giftr.form_err_flag == 4) {
             alert("Please add any of this,"+giftr.form_err_msg);
         }
         else {

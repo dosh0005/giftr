@@ -27,9 +27,15 @@ span.dob{
 }
 .midline{
     position: absolute;
-    top: 40%;
+    top: 60%;
     right: 5%;
 }
+.midline-top{
+    position: absolute;
+    top: 20%;
+    right: 5%;
+}
+
 .hide{
     display: none;
 }
