@@ -146,6 +146,8 @@ var giftr = {
             }
         }
         else {
+            giftr.form_field_name.parentElement.classList.remove("err");
+            giftr.form_field_dob.parentElement.classList.remove("err");
             if (giftr.form_edit_flag > 0) {
                 giftr.data[giftr.form_edit_flag - 1].name = giftr.form_field_name.value
                 giftr.data[giftr.form_edit_flag - 1].dob = giftr.form_field_dob.value
@@ -168,6 +170,8 @@ var giftr = {
     , resetPersonalModel: function () {
         giftr.form_field_name.value = "";
         giftr.form_field_dob.value = "";
+        giftr.form_field_name.parentElement.classList.remove("err");
+        giftr.form_field_dob.parentElement.classList.remove("err");
     }
     , closePersonalModel: function () {
         giftr.form_edit_flag = 0;
@@ -248,7 +252,6 @@ var giftr = {
             giftr.form_field_idea.parentElement.classList.add("err");
         }
         else {
-            giftr.form_field_idea.parentElement.classList.remove("err");
             if (giftr.form_edit_flag > 0) {
                 giftr.data[giftr.data_id].ideas[giftr.form_edit_flag - 1].idea = giftr.form_field_idea.value
                 giftr.data[giftr.data_id].ideas[giftr.form_edit_flag - 1].store = giftr.form_field_store.value
@@ -272,6 +275,7 @@ var giftr = {
         }
     }
     , resetIdeaModel: function () {
+        giftr.form_field_idea.parentElement.classList.remove("err");
         giftr.form_field_idea.value = "";
         giftr.form_field_store.value = "";
         giftr.form_field_url.value = "";
