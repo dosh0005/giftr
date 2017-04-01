@@ -37,5 +37,5 @@
         <platform name="ios">
             <allow-intent href="itms:*" />
             <allow-intent href="itms-apps:*" /> </platform>
-        <preference name="SplashScreenDelay" value="10000" />
+        <preference name="SplashScreenDelay" value="2000" />
         <preference name="FadeSplashScreenDuration" value="750" /> </widget>

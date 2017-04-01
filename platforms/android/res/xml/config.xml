@@ -39,6 +39,6 @@
     <icon density="xxhdpi" src="res/icon/android/xxhdpi/ic_launcher.png" />
     <icon density="xxxhdpi" src="res/icon/android/xxxhdpi/ic_launcher.png" />
     <preference name="loglevel" value="DEBUG" />
-    <preference name="SplashScreenDelay" value="10000" />
+    <preference name="SplashScreenDelay" value="2000" />
     <preference name="FadeSplashScreenDuration" value="750" />
 </widget>

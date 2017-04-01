@@ -2,8 +2,11 @@ var giftr = {
     key: "giftr-dosh0005"
     , data: []
     , data_id: null
-    , page_people: document.getElementById("contact-list")
-    , page_gift: document.getElementById("gift-list")
+    , idea_id: null
+    , page_people: null
+    , page_gift: null
+        //    , add_people: document.querySelector(".header a")
+        
     , form_field_name: null
     , form_field_dob: null
     , form_field_person: null
@@ -19,43 +22,85 @@ var giftr = {
             giftr.data = localStorage.getItem(giftr.key);
             giftr.data = JSON.parse(giftr.data);
         }
-        if (giftr.page_people) {
-            giftr.form_field_name = document.getElementById("p-name");
-            giftr.form_field_dob = document.getElementById("p-dob");
-            giftr.drawPeople();
-        }
-        if (giftr.page_gift) {
-            giftr.data_id = giftr.getQueryString("id");
+        window.addEventListener('push', giftr.changedPage);
+        giftr.setUpPeoplePage();
+    }
+    , changedPage: function () {
+        var contentDiv = document.querySelector('.content');
+        switch (contentDiv.id) {
+        case 'people':
+            giftr.setUpPeoplePage()
+            break;
+        case 'gifts':
+            giftr.page_people = null;
+            giftr.page_gift = document.getElementById("gift-list");
             giftr.form_field_person = document.getElementById("g-person");
             giftr.form_field_idea = document.getElementById("g-idea");
             giftr.form_field_store = document.getElementById("g-store");
             giftr.form_field_url = document.getElementById("g-url");
             giftr.form_field_cost = document.getElementById("g-cost");
             giftr.form_field_person.innerHTML = giftr.data[giftr.data_id].name;
+            document.getElementById("ideaAdd").addEventListener('click', giftr.addIdea);
+            document.getElementById("ideaClose").addEventListener('click', giftr.closeIdeaModel);
             giftr.drawIdea();
+            break;
         }
-        giftr.addEvents();
+    }
+    , setUpPeoplePage: function () {
+        giftr.page_people = document.getElementById("contact-list");
+        giftr.page_gift = null;
+        giftr.form_field_name = document.getElementById("p-name");
+        giftr.form_field_dob = document.getElementById("p-dob");
+        var closeAnchor = document.querySelector('#personModal header a');
+        closeAnchor.addEventListener('touchend', giftr.resetPersonalModel);
+        giftr.drawPeople();
+        document.getElementById("personAdd").addEventListener('click', giftr.addPeople);
+        document.getElementById("personClose").addEventListener('click', giftr.closePersonalModel);
+        document.getElementById("personDelete").addEventListener('click', giftr.deletePeople);
     }
     , drawPeople: function () {
         giftr.resetPersonalModel();
         giftr.page_people = document.getElementById("contact-list");
-        giftr.page_people.innerHTML = '<center style="margin: 100px 0;">Add your first contact !!</center>';
+        giftr.page_people.innerHTML = '<center class="note">Add your first contact !!</center>';
         if (giftr.data.length) {
             giftr.page_people.innerHTML = ""
             for (var i = 0; i < giftr.data.length; i++) {
-                var li2 = '<li class="table-view-cell"> ' + '<span id="p-' + giftr.data[i].id + '" class="icon icon-person pull-left" style="margin-right: 10px;color: lightcoral;" ></span>' + '<span class="name" id="' + giftr.data[i].id + '"  style="color: cornflowerblue;" >' + giftr.data[i].name + '</span>' + '<a class="navigate-right pull-right" href="gifts.html?id=' + i + '" data-ignore="push">' + ' <span class="dob">' + giftr.data[i].dob + '</span> </a>' + '</li>';
-                giftr.page_people.innerHTML = giftr.page_people.innerHTML + li2;
-            }
-            for (var i = 0; i < giftr.data.length; i++) {
-                document.getElementById(giftr.data[i].id).addEventListener('click', function (i) {
+                var li = document.createElement("li");
+                li.className = "table-view-cell";
+                var usericon = document.createElement("span");
+                usericon.className = "usericon icon icon-person pull-left";
+                usericon.setAttribute("id", "p-" + giftr.data[i].id);
+                var username = document.createElement("span");
+                username.className = "name";
+                var username_link = document.createElement("a");
+                username_link.setAttribute("href", "#personModal");
+                username_link.innerHTML = giftr.data[i].name;
+                var gift = document.createElement("a");
+                gift.className = "navigate-right pull-right";
+                gift.setAttribute("href", "gifts.html");
+                var gift_dob = document.createElement("span");
+                gift_dob.className = "dob";
+                gift_dob.innerHTML = moment(giftr.data[i].dob).format(" MMM Do ");
+                gift.appendChild(gift_dob);
+                username.appendChild(username_link);
+                li.appendChild(usericon);
+                li.appendChild(username);
+                li.appendChild(gift);
+                giftr.page_people.appendChild(li);
+                username.addEventListener('touchend', function (i) {
                     return function () {
-                        document.getElementById("personModal").classList.add("active");
+                        giftr.data_id = i;
                         document.getElementById("personDelete").classList.remove("hide");
                         giftr.form_field_name.value = giftr.data[i].name;
                         giftr.form_field_dob.value = giftr.data[i].dob;
                         giftr.form_edit_flag = i + 1;
                     }
                 }(i));
+                gift.addEventListener('touchend', function (i) {
+                    return function () {
+                        giftr.data_id = i;
+                    }
+                }(i))
             }
         }
     }
@@ -74,20 +119,35 @@ var giftr = {
         giftr.form_err_flag = 0;
         giftr.form_err_msg = "";
         if (giftr.form_field_name.value === "") {
-            giftr.form_err_msg += " Please Enter name. ";
-            giftr.form_err_flag = 1;
+            giftr.form_err_msg += "<br>=> Name";
+            giftr.form_err_flag += 1;
         }
         if (giftr.form_field_dob.value === "") {
-            giftr.form_err_msg += " Please Enter Date of Birth. ";
-            giftr.form_err_flag = 1;
+            giftr.form_err_msg += "<br>=> Date of Birth ";
+            giftr.form_err_flag += 2;
         }
     }
     , addPeople: function () {
         giftr.checkPeople();
         if (giftr.form_err_flag) {
-            alert(giftr.form_err_msg);
+            switch (giftr.form_err_flag) {
+            case 1:
+                giftr.form_field_name.parentElement.classList.add("err");
+                giftr.form_field_dob.parentElement.classList.remove("err");
+                break;
+            case 2:
+                giftr.form_field_name.parentElement.classList.remove("err");
+                giftr.form_field_dob.parentElement.classList.add("err");
+                break;
+            case 3:
+                giftr.form_field_name.parentElement.classList.add("err");
+                giftr.form_field_dob.parentElement.classList.add("err");
+                break;
+            }
         }
         else {
+            giftr.form_field_name.parentElement.classList.remove("err");
+            giftr.form_field_dob.parentElement.classList.remove("err");
             if (giftr.form_edit_flag > 0) {
                 giftr.data[giftr.form_edit_flag - 1].name = giftr.form_field_name.value
                 giftr.data[giftr.form_edit_flag - 1].dob = giftr.form_field_dob.value
@@ -110,25 +170,55 @@ var giftr = {
     , resetPersonalModel: function () {
         giftr.form_field_name.value = "";
         giftr.form_field_dob.value = "";
+        giftr.form_field_name.parentElement.classList.remove("err");
+        giftr.form_field_dob.parentElement.classList.remove("err");
     }
     , closePersonalModel: function () {
         giftr.form_edit_flag = 0;
         giftr.resetPersonalModel();
         document.getElementById("personDelete").classList.add("hide");
-        document.getElementById("personModal").classList.remove("active");
+        var closelink = document.querySelector('#personModal header a');
+        var myClick = new CustomEvent('touchend', {
+            bubbles: true
+            , cancelable: true
+        });
+        closelink.dispatchEvent(myClick);
     }
     , drawIdea: function () {
-        giftr.page_gift.innerHTML = '<center style="margin: 100px 0;">Add first gift idea</center>';
+        giftr.page_gift.innerHTML = '<center class="note">Add first gift idea</center>';
+        console.log(giftr.data[giftr.data_id], giftr.data[giftr.data_id].ideas.length)
         if (giftr.data[giftr.data_id] && giftr.data[giftr.data_id].ideas.length) {
-            giftr.page_gift.innerHTML = ""
+            giftr.page_gift.innerHTML = "";
             for (var i = 0; i < giftr.data[giftr.data_id].ideas.length; i++) {
-                var li = '<li class="table-view-cell media">' + ' <span id="g-delete-' + giftr.data[giftr.data_id].ideas[i].idIdea + '" class="pull-right icon icon-trash midline" style="color:lightcoral;"></span><span id="g-' + giftr.data[giftr.data_id].ideas[i].idIdea + '"  class="icon icon-edit midline-top" style="color:cornflowerblue"></span>' + '<div class="media-body"> ' + giftr.data[giftr.data_id].ideas[i].idea + '<p>' + giftr.data[giftr.data_id].ideas[i].store + '&nbsp;</p>' + '<p><a href="' + giftr.data[giftr.data_id].ideas[i].url + '" target="_blank" data-ignore="push">' + giftr.data[giftr.data_id].ideas[i].url + '</a></p>' + '<p>' + giftr.data[giftr.data_id].ideas[i].cost + '</p>' + '</div>' + '</li>';
-                giftr.page_gift.innerHTML += li;
-            }
-            for (var i = 0; i < giftr.data[giftr.data_id].ideas.length; i++) {
-                document.getElementById("g-" + giftr.data[giftr.data_id].ideas[i].idIdea).addEventListener("click", function (i) {
+                var li = document.createElement("li");
+                li.className = "table-view-cell media";
+                var span_delete = document.createElement("span");
+                span_delete.className = "pull-right icon icon-trash midline";
+                var divMedia = document.createElement("div");
+                divMedia.className = "media-body";
+                var p_idea = document.createElement("a");
+                p_idea.setAttribute("href", "#giftModal");
+                p_idea.innerHTML = giftr.data[giftr.data_id].ideas[i].idea;
+                var p_store = document.createElement("p");
+                p_store.innerHTML = giftr.data[giftr.data_id].ideas[i].store + "&nbsp;";
+                var p_url = document.createElement("p");
+                var p_url_a = document.createElement("a");
+                p_url_a.setAttribute("href", giftr.data[giftr.data_id].ideas[i].url);
+                p_url_a.setAttribute("target", "_blank");
+                p_url_a.innerHTML = giftr.data[giftr.data_id].ideas[i].url;
+                var p_cost = document.createElement("p");
+                p_cost.innerHTML = giftr.data[giftr.data_id].ideas[i].cost;
+                p_url.appendChild(p_url_a);
+                divMedia.appendChild(p_idea);
+                divMedia.appendChild(p_store);
+                divMedia.appendChild(p_url);
+                divMedia.appendChild(p_cost);
+                li.appendChild(span_delete);
+                li.appendChild(divMedia);
+                giftr.page_gift.appendChild(li);
+                p_idea.addEventListener("touchend", function (i) {
                     return function () {
-                        document.getElementById("giftModal").classList.add("active");
+                        //                        document.getElementById("giftModal").classList.add("active");
                         giftr.form_field_idea.value = giftr.data[giftr.data_id].ideas[i].idea;
                         giftr.form_field_store.value = giftr.data[giftr.data_id].ideas[i].store;
                         giftr.form_field_url.value = giftr.data[giftr.data_id].ideas[i].url;
@@ -136,11 +226,9 @@ var giftr = {
                         giftr.form_edit_flag = i + 1;
                     }
                 }(i));
-            }
-            for (var i = 0; i < giftr.data[giftr.data_id].ideas.length; i++) {
-                document.getElementById("g-delete-" + giftr.data[giftr.data_id].ideas[i].idIdea).addEventListener("click", function (i) {
+                span_delete.addEventListener("touchend", function (i) {
                     return function () {
-                        if (confirm("Are you sure want to delete '" + giftr.data[giftr.data_id].ideas[i].idea+"' ?")) {
+                        if (confirm("Are you sure want to delete '" + giftr.data[giftr.data_id].ideas[i].idea + "' ?")) {
                             giftr.data[giftr.data_id].ideas.splice(i, 1);
                             giftr.storeLocal();
                             giftr.drawIdea();
@@ -154,26 +242,14 @@ var giftr = {
         giftr.form_err_flag = 0;
         giftr.form_err_msg = "";
         if (giftr.form_field_idea.value === "") {
-            giftr.form_err_msg += "\n idea ";
-            giftr.form_err_flag += 1;
-        }
-        if (giftr.form_field_store.value === "") {
-            giftr.form_err_msg += "\n store ";
-            giftr.form_err_flag += 1;
-        }
-        if (giftr.form_field_url.value === "") {
-            giftr.form_err_msg += "\n url ";
-            giftr.form_err_flag += 1;
-        }
-        if (giftr.form_field_cost.value === "") {
-            giftr.form_err_msg += "\n cost ";
-            giftr.form_err_flag += 1;
+            giftr.form_err_msg += "idea";
+            giftr.form_err_flag = 1;
         }
     }
     , addIdea: function () {
         giftr.checkIdea();
-        if (giftr.form_err_flag == 4) {
-            alert("Please add any of this,"+giftr.form_err_msg);
+        if (giftr.form_err_flag > 0) {
+            giftr.form_field_idea.parentElement.classList.add("err");
         }
         else {
             if (giftr.form_edit_flag > 0) {
@@ -199,6 +275,7 @@ var giftr = {
         }
     }
     , resetIdeaModel: function () {
+        giftr.form_field_idea.parentElement.classList.remove("err");
         giftr.form_field_idea.value = "";
         giftr.form_field_store.value = "";
         giftr.form_field_url.value = "";
@@ -207,29 +284,23 @@ var giftr = {
     , closeIdeaModel: function () {
         giftr.form_edit_flag = 0;
         giftr.resetIdeaModel();
-        document.getElementById("giftModal").classList.remove("active");
+        var closelink = document.querySelector('#giftModal header a');
+        var myClick = new CustomEvent('touchend', {
+            bubbles: true
+            , cancelable: true
+        });
+        closelink.dispatchEvent(myClick);
     }
     , addEvents: function () {
-        if (giftr.page_people) {
-            document.getElementById("personAdd").addEventListener('click', giftr.addPeople);
-            document.getElementById("personClose").addEventListener('click', giftr.closePersonalModel);
-            document.getElementById("personDelete").addEventListener('click', giftr.deletePeople);
-            document.getElementById("model-close-btn").addEventListener('click', giftr.closePersonalModel);
-        }
-        if (giftr.page_gift) {
-            document.getElementById("ideaAdd").addEventListener('click', giftr.addIdea);
-            document.getElementById("ideaClose").addEventListener('click', giftr.closeIdeaModel);
-            document.getElementById("model-close-btn").addEventListener('click', giftr.closeIdeaModel);
-        }
+        if (giftr.page_people) {}
+        if (giftr.page_gift) {}
     }
     , storeLocal: function () {
         if (giftr.page_people) {
             giftr.data.sort(function (a, b) {
-                var x = new Date(a.dob)
-                    , y = new Date(b.dob);
-                console.log(x, a.dob, y, b.dob);
-                var z = x < y ? -1 : 1;
-                console.log(z);
+                var p = moment(a.dob).format('MMDD')
+                    , q = moment(b.dob).format('MMDD');
+                var z = p < q ? -1 : 1;
                 return z;
             });
         }
@@ -237,12 +308,5 @@ var giftr = {
         localStorage.removeItem(giftr.key);
         localStorage.setItem(giftr.key, d);
     }
-    , getQueryString: function (field, url) {
-        var href = url ? url : window.location.href;
-        var reg = new RegExp('[?&]' + field + '=([^&#]*)', 'i');
-        var string = reg.exec(href);
-        return string ? string[1] : null;
-    }
 }
-
-document.addEventListener("DOMContentLoaded", giftr.init);
+document.addEventListener("deviceready", giftr.init);
